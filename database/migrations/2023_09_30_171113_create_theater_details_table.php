@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('theater_details', function (Blueprint $table) {
             $table->id();
-            $table->string('theater_name'); 
+            $table->integer('theater_id'); 
             $table->string('movie_name'); 
             $table->date('show_date'); 
             $table->time('show_time'); 

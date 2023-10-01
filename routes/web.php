@@ -19,7 +19,7 @@ Route::get('/', function () {
     return view('login');
 });
 
-Route::get('/dashboard', [TheaterController::class,'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [TheaterController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -27,9 +27,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::post('add_theater',[TheaterController::class,'create_theater']);
-Route::post('add_shows',[TheaterController::class,'create_show'])->name('saveShow');
-Route::get('/image/{filename}', [TheaterController::class,'show_image'])->name('image.show');
+Route::post('add_theater', [TheaterController::class, 'create_theater']);
+Route::post('add_shows', [TheaterController::class, 'create_show'])->name('saveShow');
+Route::get('/image/{filename}', [TheaterController::class, 'show_image'])->name('image.show');
+
+Route::view('/booking_completed', 'after_booking')->name('booking_completed');
 
 
-require __DIR__.'/auth.php';
+
+require __DIR__ . '/auth.php';

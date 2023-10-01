@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\InformUser;
 use App\Models\TheaterDetails;
 use App\Models\TheaterList;
+use App\Models\Tickets;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class TheaterController extends Controller
 {
@@ -17,7 +21,6 @@ class TheaterController extends Controller
         $theater_list = TheaterList::select('name', 'id')->get();
 
         $shows = TheaterDetails::get();
-        // dd($shows);
 
         return view('dashboard', ['theater_list' => $theater_list, 'shows' => $shows]);
     }
@@ -37,8 +40,6 @@ class TheaterController extends Controller
 
     public function create_show(Request $request)
     {
-        // dd($request->all());
-        // Validate the request data
         $request->validate([
             'theaterSelect' => 'required',
             'movieName' => 'required',
@@ -48,12 +49,12 @@ class TheaterController extends Controller
             'movieThumbnail' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Adjust allowed image formats and size as needed.
         ]);
 
-        // Handle the image upload
+
+        // upload the file
         $imagePath = $request->file('movieThumbnail')->store('images'); // You can adjust the storage path as needed.
 
-        // Create a new TheaterDetails model and populate it with the request data
         $theaterDetail = new TheaterDetails();
-        $theaterDetail->theater_name = $request->input('theaterSelect');
+        $theaterDetail->theater_id = $request->input('theaterSelect');
         $theaterDetail->movie_name = $request->input('movieName');
         $theaterDetail->show_date = $request->input('showDate');
         $theaterDetail->show_time = $request->input('showTime');
@@ -69,7 +70,6 @@ class TheaterController extends Controller
     {
         $path = 'thumbnails/' . $filename;
 
-        // Check if the file exists in storage
         if (Storage::exists($path)) {
             $file = Storage::get($path);
             $mimeType = Storage::mimeType($path);
@@ -77,7 +77,48 @@ class TheaterController extends Controller
             return response($file, 200)->header('Content-Type', $mimeType);
         }
 
-        // Handle the case when the file doesn't exist
         abort(404);
+    }
+
+    public function book()
+    {
+
+        $theater_list = TheaterList::select('name', 'id')->get();
+
+        $shows = TheaterDetails::get();
+
+
+
+        return view('book_ticket', ['theaters' => $theater_list, 'shows' => $shows]);
+    }
+
+
+
+    public function save(Request $request)
+    {
+        $validatedData = $request->validate([
+            'theaterSelect' => 'required|exists:theater_lists,id',
+            'movieName' => 'required|string|max:255',
+            'showDate' => 'required|date',
+            'showTime' => 'required|date_format:H:i',
+            'numSeats' => 'required|integer|min:1',
+            'email' => 'required|email',
+        ]);
+
+        $ticket = new Tickets();
+        $ticket->theater_id = $validatedData['theaterSelect'];
+        $ticket->movie_name = $validatedData['movieName'];
+        $ticket->show_date = $validatedData['showDate'];
+        $ticket->show_time = $validatedData['showTime'];
+        $ticket->num_seats = $validatedData['numSeats'];
+        $ticket->booking_id = Str::random(10);
+
+        $ticket->email = $validatedData['email'];
+
+        $ticket->save();
+
+        Mail::to($validatedData['email'])->send(new InformUser($ticket));
+
+        return redirect()->route('booking_completed')->with('success', 'Ticket booked successfully!');
     }
 }

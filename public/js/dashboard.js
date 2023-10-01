@@ -15,14 +15,13 @@ $(document).ready(function () {
     });
 
     $("#submitShows").click(function () {
-        var formData = new FormData($("#addShowsForm")[0]); // Create a FormData object with the form data.
-    
+        var formData = new FormData($("#addShowsForm")[0]); 
         $.ajax({
             url: '/add_shows',
             type: "POST",
-            data: formData, // Use the FormData object here.
-            processData: false, // Prevent jQuery from processing the data
-            contentType: false, // Prevent jQuery from setting the content type
+            data: formData, 
+            processData: false, 
+            contentType: false,
             success: function (response) {
                 console.log(response);
                 $("#Addshows").modal("hide");

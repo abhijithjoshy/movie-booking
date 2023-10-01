@@ -43,11 +43,10 @@
                         <td>{{ $show->show_time }}</td>
                         <td>{{ $show->num_seats }}</td>
                         <td>
-                            <td>
-                                <img src="{{ Storage::url($show->movie_thumbnail_path ) }}" alt="Movie Thumbnail" width="100">
-                            </td>
-                            
+                            <img src="{{ Storage::url($show->movie_thumbnail_path) }}" alt="Movie Thumbnail"
+                                width="100">
                         </td>
+
                     </tr>
                 @endforeach
 
